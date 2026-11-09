@@ -1,2 +1,7 @@
+
 -r base.txt
-ruff
+
+ruff==0.16.10
+
+Faker==40.44.0
+
