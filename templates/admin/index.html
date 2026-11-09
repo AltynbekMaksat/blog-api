@@ -1,0 +1,131 @@
+{% extends "unfold/layouts/base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+<div class="px-4 lg:px-8">
+
+    <!-- Statistics -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+
+        {% for label, value in stats %}
+        <div class="bg-white dark:bg-base-900 border border-base-200 dark:border-base-800 rounded-xl p-6 shadow-sm">
+            <p class="text-sm font-medium text-base-500">{{ label }}</p>
+            <p class="text-3xl font-semibold text-base-900 dark:text-white mt-3">
+                {{ value }}
+            </p>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <!-- Category statistics and publication status -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+        <div class="bg-white dark:bg-base-900 border border-base-200 dark:border-base-800 rounded-xl p-6">
+
+            <h2 class="text-lg font-semibold mb-6">Posts by category</h2>
+
+            {% for category in posts_by_category %}
+            <div class="mb-5">
+
+                <div class="flex justify-between text-sm mb-2">
+                    <span>{{ category.name }}</span>
+                    <span class="font-semibold">
+                        {{ category.posts_count }}
+                    </span>
+                </div>
+
+                <div class="w-full bg-base-200 dark:bg-base-800 rounded-full h-2.5">
+                    <div
+                            class="bg-primary-600 h-2.5 rounded-full"
+                            style="width: {% widthratio category.posts_count total_posts 100 %}%">
+                    </div>
+                </div>
+
+            </div>
+            {% empty %}
+            <p>No categories found.</p>
+            {% endfor %}
+
+        </div>
+
+        <div class="bg-white dark:bg-base-900 border border-base-200 dark:border-base-800 rounded-xl p-6">
+
+            <h2 class="text-lg font-semibold mb-6">Publication status</h2>
+
+            <div class="mb-6">
+                <div class="flex justify-between mb-2 text-sm">
+                    <span>Published</span>
+                    <span class="font-semibold">
+                        {{ published_posts }} ({{ published_percent }}%)
+                    </span>
+                </div>
+
+                <div class="bg-base-200 dark:bg-base-800 rounded-full h-3">
+                    <div
+                            class="bg-green-500 h-3 rounded-full"
+                            style="width: {{ published_percent }}%">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between mb-2 text-sm">
+                    <span>Drafts</span>
+                    <span class="font-semibold">
+                        {{ draft_posts }} ({{ draft_percent }}%)
+                    </span>
+                </div>
+
+                <div class="bg-base-200 dark:bg-base-800 rounded-full h-3">
+                    <div
+                            class="bg-orange-500 h-3 rounded-full"
+                            style="width: {{ draft_percent }}%">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Top authors -->
+    <div class="bg-white dark:bg-base-900 border border-base-200 dark:border-base-800 rounded-xl p-6 mt-6">
+
+        <h2 class="text-lg font-semibold mb-5">Top 5 Authors</h2>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+
+                <thead>
+                <tr class="border-b border-base-200 dark:border-base-800 text-base-500">
+                    <th class="text-left py-3">Email</th>
+                    <th class="text-left py-3">Posts</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for author in top_authors %}
+                <tr class="border-b border-base-100 dark:border-base-800">
+                    <td class="py-4">{{ author.email }}</td>
+                    <td class="py-4 font-semibold">
+                        {{ author.posts_count }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="py-4">No authors found.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
