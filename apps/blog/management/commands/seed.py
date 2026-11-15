@@ -1,8 +1,10 @@
 import random
+from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand, CommandError
+from django.utils import timezone
 from django.utils.text import slugify
 from faker import Faker
 
@@ -54,6 +56,12 @@ PUBLISHED_PERCENTAGE = 70
 STAFF_PERCENTAGE = 10
 MAX_TAGS_PER_POST = 5
 MAX_SENTENCES_PER_COMMENT = 3
+
+POST_DATE_RANGE_DAYS = 365
+UPDATED_POSTS_PERCENTAGE = 30
+MIN_UPDATE_DAYS = 1
+MAX_UPDATE_DAYS = 30
+SECONDS_PER_DAY = 86400
 
 
 class Command(BaseCommand):
@@ -211,6 +219,35 @@ class Command(BaseCommand):
             )
 
         Post.objects.bulk_create(posts)
+
+        now = timezone.now()
+
+        for post in posts:
+            age_seconds = random.randint(
+                0,
+                POST_DATE_RANGE_DAYS * SECONDS_PER_DAY,
+            )
+
+            post.created_at = now - timedelta(seconds=age_seconds)
+
+            if random.random() < UPDATED_POSTS_PERCENTAGE / 100:
+                update_days = random.randint(
+                    MIN_UPDATE_DAYS,
+                    MAX_UPDATE_DAYS,
+                )
+
+                post.updated_at = min(
+                    post.created_at + timedelta(days=update_days),
+                    now,
+                )
+            else:
+                post.updated_at = post.created_at
+
+        Post.objects.bulk_update(
+            posts,
+            ["created_at", "updated_at"],
+        )
+
         return list(Post.objects.filter(slug__in=used_slugs))
 
     def assign_tags(self, posts, tags):
@@ -237,3 +274,15 @@ class Command(BaseCommand):
         ]
 
         Comment.objects.bulk_create(comments)
+
+        now = timezone.now()
+
+        for comment in comments:
+            post_created_at = comment.post.created_at
+            time_range = int((now - post_created_at).total_seconds())
+
+            comment.created_at = post_created_at + timedelta(
+                seconds=random.randint(0, time_range),
+            )
+
+        Comment.objects.bulk_update(comments, ["created_at"])
